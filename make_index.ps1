@@ -5,6 +5,18 @@
     spin through directory and make an index of icons by folder
 #>
 
+[CmdletBinding()]
+param (
+    # Where are the icons
+    [Parameter()]
+    [string]
+    $IconRootPath = $PSScriptRoot
+)
+
+if ([String]::IsNullOrWhiteSpace($IconRootPath)) {
+    $IconRootPath = $PSScriptRoot
+}
+
 [string]$template = "template.html"
 $template = Join-Path -Path $PSScriptRoot -ChildPath $template
 if (-not (Test-Path $template)) {
@@ -12,7 +24,7 @@ if (-not (Test-Path $template)) {
     return 1;
 }
 [string]$workFile = "workFile.html"
-$workFile = Join-Path -Path $PSScriptRoot -ChildPath $workFile
+$workFile = Join-Path -Path $IconRootPath -ChildPath $workFile
 if (Test-Path $workFile) {
     Remove-Item $workFile -Force
 }
@@ -20,7 +32,7 @@ if (Test-Path $workFile) {
 [int32]$previewSize = 64;
 [string]$LASTFOLDER = "--------"
 
-$files = Get-ChildItem -Path $PSScriptRoot -Filter *.svg -Recurse | ForEach-Object { $_.FullName }
+$files = Get-ChildItem -Path $IconRootPath -Filter *.svg -Recurse | ForEach-Object { $_.FullName }
 [bool]$first = $true
 foreach ($file in $files) {
     [string]$name = Split-Path -Path $file -Leaf
@@ -46,7 +58,7 @@ foreach ($file in $files) {
 #
 # Merge
 [string]$indexFile = "index.html"
-$indexFile = Join-Path -Path $PSScriptRoot -ChildPath $indexFile
+$indexFile = Join-Path -Path $IconRootPath -ChildPath $indexFile
 if (Test-Path $indexFile) {
     Remove-Item $indexFile -Force
 }
