@@ -29,11 +29,15 @@ if (Test-Path $workFile) {
     Remove-Item $workFile -Force
 }
 
+# Change this to set size of Image
 [int32]$previewSize = 64;
-[string]$LASTFOLDER = "--------"
 
-$files = Get-ChildItem -Path $IconRootPath -Filter *.svg -Recurse | ForEach-Object { $_.FullName }
+# Supported by Chrome as 2026-02-02
+$graphics = [string[]]@("*.svg", "*.png", "*.jpg", "*jpeg", "*.jfif", "*.gif", "*.webp", "*.avif", "*.bmp", "*.ico", "*.tiff");
+
+$files = Get-ChildItem -Path $IconRootPath -Include $graphics -Recurse | ForEach-Object { $_.FullName }
 [bool]$first = $true
+[string]$LASTFOLDER = "--------"
 foreach ($file in $files) {
     [string]$name = Split-Path -Path $file -Leaf
     [string]$parentPath = Split-Path -Path (Get-Item $file).DirectoryName -Leaf
@@ -44,12 +48,11 @@ foreach ($file in $files) {
         }
         $LASTFOLDER = $parentPath;
         "<h2>${parentPath}</h2>" >> $workFile;
-        "<div class='container'>" >> $workFile;
+        "<div class='container m-3'>" >> $workFile;
         "<div class='d-flex flex-wrap bg-light'>" >> $workFile
     }
-    #"<div class='p-1 border w-20'><img src='$parentPath/$name' width=$previewSize /> <span class='zcaption'>$name</span></div>" >> $workFile
     [string]$caption = $name.Replace("-", "- ");
-    "<div class='card p-3'><div class='card-title bg-primary-subtile text-black'><span class='zcaption'>$caption</span></div><div class='card-body'><img src='$parentPath/$name' width=$previewSize /></div></div>" >> $workFile
+    "<div class='card p-3 m-1'><div class='card-title bg-primary-subtile text-black'><span class='zcaption'>$caption</span></div><div class='card-body'><img src='$parentPath/$name' width=$previewSize /></div></div>" >> $workFile
     
     $first = $false;
 }
