@@ -40,7 +40,9 @@ $files = Get-ChildItem -Path $IconRootPath -Include $graphics -Recurse | ForEach
 [string]$LASTFOLDER = "--------"
 foreach ($file in $files) {
     [string]$name = Split-Path -Path $file -Leaf
+    $name = $name.Trim();
     [string]$parentPath = Split-Path -Path (Get-Item $file).DirectoryName -Leaf
+    $parentPath = $parentPath.trim();
 
     if ($parentPath -ne $LASTFOLDER) {
         if (-not $first) {
@@ -52,11 +54,18 @@ foreach ($file in $files) {
         "<div class='d-flex flex-wrap bg-light'>" >> $workFile
     }
     [string]$caption = $name.Replace("-", "- ");
-    "<div class='card p-3 m-1'><div class='card-title bg-primary-subtile text-black'><span class='zcaption'>$caption</span></div><div class='card-body'><img src='$parentPath/$name' width=$previewSize /></div></div>" >> $workFile
+    [string]$copyPath = "${parentPath}/${name}"
+    $copyPath = "!!" + $copyPath + "!!";
+    "<div class='card p-3 m-1'><div class='card-title bg-primary-subtile text-black'><span class='zcaption'>$caption</span><i onclick='copyTextToClipboard($copyPath)' class='bi bi-copy fs-5'></i></div><div class='card-body'><img src='$parentPath/$name' width=$previewSize /></div></div>" >> $workFile
     
     $first = $false;
 }
 "</div></div>" >> $workFile
+
+#
+# Post-Process
+(Get-Content -Path $workFile) -replace "'", '"' | Set-Content -Path $workFile
+(Get-Content -Path $workFile) -replace "!!", "'" | Set-Content -Path $workFile
 
 #
 # Merge
@@ -78,9 +87,7 @@ foreach ($line in Get-Content -Path $template) {
     }
 }
 
-#
-# Post-Process
-(Get-Content -Path $indexFile) -replace "'", '"' | Set-Content -Path $indexFile
+
 
 #
 # Clean up
